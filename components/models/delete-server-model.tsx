@@ -1,0 +1,88 @@
+'use client';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
+import axios from 'axios'
+import { Button } from "@/components/ui/button";
+
+import { useModal } from '@/hooks/use-model-store';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+const DeleteServerModel = () => {
+  const { isOpen, onClose, type, data } = useModal();
+
+  const { refresh, push } = useRouter()
+
+  const [loading, setLoading] = useState(false);
+
+  const { server } = data;
+
+  const isModelOpen = isOpen && type === 'deleteServer';
+
+  const onConfirm = async () => {
+    try {
+      setLoading(true);
+
+      await axios.delete(`/api/server/${server?.id}`);
+
+      onClose();
+
+      refresh()
+
+      push('/')
+    } catch (err) {
+      console.log(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
+  return (
+    <>
+      <Dialog open={isModelOpen} onOpenChange={onClose}>
+        <DialogContent className='bg-white text-black p-0 overflow-hidden'>
+          <DialogHeader className='pt-8 px-6'>
+            <DialogTitle className=' text-2xl text-center font-bold'>
+              Delete Server
+            </DialogTitle>
+          </DialogHeader>
+          <DialogDescription className=' text-center text-zinc-500'>
+            Are you sure you want to do this? <br />
+            <span
+              className=' font-semibold text-indigo-500'
+            >{server?.name}
+            </span> will be premanetly deleted
+          </DialogDescription>
+          <DialogFooter className=' bg-gray-100 px-6 py-4'>
+            <div className=' flex items-center justify-between w-full'>
+              <Button
+                disabled={loading}
+                onClick={onClose}
+                variant={'ghost'}
+              >
+                cancel
+              </Button>
+              <Button
+                disabled={loading}
+                onClick={onConfirm}
+                variant={'primary'}
+              >
+                confirm
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+export default DeleteServerModel;
